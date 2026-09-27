@@ -6,7 +6,7 @@ import { useAuth } from '../app/useAuth';
 
 export const Main = () => {
   const { user, isAuthenticated, isLoading } = useAuth();
-  const [activeTab, setActiveTab] = useState('Пешая арена');
+  const [activeTab, setActiveTab] = useState<'Пешая арена' | 'Флот' | 'Рейтинг' | 'История'>('Пешая арена');
 
   const breadcrumbCurrent = !isAuthenticated && !isLoading ? 'Вход' : activeTab;
 
@@ -20,7 +20,7 @@ export const Main = () => {
       <div style={{ padding: '0 24px', width: '100%', margin: '0 auto 40px' }}>
         {!isLoading && !isAuthenticated && <AuthBanner />}
         {!isLoading && isAuthenticated && user && activeTab === 'Пешая арена' && (
-          <SquadArena user={user} />
+          <SquadArena user={user} onNavigateToHistory={() => setActiveTab('История')} />
         )}
       </div>
     </main>
