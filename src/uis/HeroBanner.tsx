@@ -20,6 +20,9 @@ const BACKGROUNDS: Record<TabType, string> = {
 export const HeroBanner = () => {
   const [activeTab, setActiveTab] = useState<TabType>('Пешая арена');
 
+  const isSpace = activeTab === 'Рейтинг' || activeTab === 'История';
+  const bgOpacity = isSpace ? 0.22 : 0.12;
+
   return (
     <section
       style={{
@@ -38,9 +41,9 @@ export const HeroBanner = () => {
           backgroundImage: `url(${BACKGROUNDS[activeTab]})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          opacity: 0.12,
+          opacity: bgOpacity,
           pointerEvents: 'none',
-          transition: 'background-image 0.2s ease',
+          transition: 'background-image 0.2s ease, opacity 0.2s ease',
         }}
       />
 
