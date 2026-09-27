@@ -26,10 +26,22 @@ export const Footer = () => {
           </span>
           <ul style={{ listStyle: 'none', marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '14px' }}>
             <li>
-              <a href="#" style={{ color: '#64748b' }}>Guilds</a>
+              <a
+                href="https://t.me/SwgohGuilds_bot"
+                target="_blank"
+                rel="noreferrer"
+                style={{ color: '#64748b' }}
+              >
+                Поиск Гильдии
+              </a>
             </li>
             <li>
-              <span style={{ color: '#ffffff', fontWeight: 400 }}>Arena</span>
+              <a
+                href="https://arena-nine-green.vercel.app"
+                style={{ color: '#ffffff', fontWeight: 400 }}
+              >
+                Арена
+              </a>
             </li>
           </ul>
         </div>
@@ -40,12 +52,24 @@ export const Footer = () => {
           </span>
           <ul style={{ listStyle: 'none', marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '14px' }}>
             <li>
-              <a href="https://t.me/example" target="_blank" rel="noreferrer" style={{ color: '#64748b' }}>
+              <a
+                href="https://t.me/example"
+                target="_blank"
+                rel="noreferrer"
+                style={{ color: '#64748b' }}
+              >
                 Наш канал
               </a>
             </li>
             <li>
-              <a href="#" style={{ color: '#64748b' }}>Гильдия в SWGOH</a>
+              <a
+                href="https://swgoh.gg/g/ZsQzG2VxSsaH9oAqYNNoig/"
+                target="_blank"
+                rel="noreferrer"
+                style={{ color: '#64748b' }}
+              >
+                Гильдия в SWGOH
+              </a>
             </li>
           </ul>
         </div>
@@ -90,8 +114,22 @@ export const Footer = () => {
             </button>
             {isAuthorsOpen && (
               <div style={{ marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '6px', paddingLeft: '8px', borderLeft: '1px solid #1e293b' }}>
-                <span style={{ fontSize: '13px', color: '#cbd5e1' }}>glavnyvny</span>
-                <span style={{ fontSize: '13px', color: '#cbd5e1' }}>ribapibaa</span>
+                <a
+                  href="https://t.me/temkazavr"
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{ fontSize: '13px', color: '#cbd5e1' }}
+                >
+                  glavny
+                </a>
+                <a
+                  href="https://t.me/RibaPibaa"
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{ fontSize: '13px', color: '#cbd5e1' }}
+                >
+                  ribapibaa
+                </a>
               </div>
             )}
           </div>
