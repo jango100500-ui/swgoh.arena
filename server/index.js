@@ -7,8 +7,8 @@ const { Pool } = pg;
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const PROXY_URL = process.env.PROXY_URL || 'https://arena-tracker-proxy.onrender.com';
-const BOT_USERNAME = process.env.BOT_USERNAME || 'example_bot';
+const COMLINK_URL = process.env.COMLINK_URL || 'https://arena-tracker-proxy.onrender.com';
+const BOT_USERNAME = process.env.BOT_USERNAME || 'swgoh_arena_bot';
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -27,18 +27,35 @@ app.get('/health', async (req, res) => {
   }
 });
 
+app.get('/portraitImage', (req, res) => {
+  const { portraitId } = req.query;
+  if (!portraitId) {
+    return res.status(400).send('portraitId required');
+  }
+  const cleanId = String(portraitId).replace(/^_portrait_/, '');
+  res.redirect(`https://game-assets.swgoh.gg/textures/${encodeURIComponent(cleanId)}.png`);
+});
+
 app.get('/profile', async (req, res) => {
   const { allyCode } = req.query;
   if (!allyCode) {
     return res.status(400).json({ error: 'allyCode required' });
   }
 
+  const clean = String(allyCode).replace(/\D/g, '');
+
   try {
-    const response = await fetch(`${PROXY_URL}/profile?allyCode=${encodeURIComponent(allyCode)}`);
-    const data = await response.json();
+    const response = await fetch(`${COMLINK_URL}/player`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ payload: { allyCode: clean } })
+    });
+
     if (!response.ok) {
-      return res.status(response.status).json(data);
+      return res.status(response.status).json({ error: 'Player not found in SWGOH' });
     }
+
+    const data = await response.json();
     res.json(data);
   } catch (error) {
     res.status(500).json({ error: error.message });
