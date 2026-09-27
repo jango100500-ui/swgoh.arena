@@ -70,6 +70,9 @@ export const Header = ({ user, isAuthenticated, showSearch = true, onOpenProfile
               src={`https://arena-tracker-proxy.onrender.com/portraitImage?portraitId=${encodeURIComponent(user.portraitId)}`}
               alt={user.playerName}
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+              }}
             />
           ) : (
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
