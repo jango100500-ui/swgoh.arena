@@ -1,4 +1,43 @@
+import { useState } from 'react';
+
 export const AuthBanner = () => {
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('https://arena-tracker-2uod.onrender.com/api/auth/start-session', {
+        method: 'POST',
+      });
+      const data = await res.json();
+
+      if (!data.botUrl || !data.sessionToken) {
+        throw new Error('Failed to get bot session');
+      }
+
+      window.open(data.botUrl, '_blank');
+
+      const interval = setInterval(async () => {
+        try {
+          const checkRes = await fetch(
+            `https://arena-tracker-2uod.onrender.com/api/auth/check-session?token=${encodeURIComponent(data.sessionToken)}`
+          );
+          const checkData = await checkRes.json();
+
+          if (checkData.status === 'approved' && checkData.authToken) {
+            clearInterval(interval);
+            localStorage.setItem('arena_token', checkData.authToken);
+            window.location.reload();
+          }
+        } catch {
+          // Continue polling
+        }
+      }, 2000);
+    } catch {
+      setLoading(false);
+    }
+  };
+
   return (
     <section
       style={{
@@ -49,6 +88,8 @@ export const AuthBanner = () => {
         </p>
 
         <button
+          onClick={handleLogin}
+          disabled={loading}
           style={{
             width: '100%',
             backgroundColor: '#2563EB',
@@ -61,11 +102,13 @@ export const AuthBanner = () => {
             alignItems: 'center',
             justifyContent: 'center',
             transition: 'background-color 0.15s ease',
+            opacity: loading ? 0.7 : 1,
+            cursor: loading ? 'default' : 'pointer',
           }}
-          onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#1d4ed8')}
-          onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#2563EB')}
+          onMouseOver={(e) => !loading && (e.currentTarget.style.backgroundColor = '#1d4ed8')}
+          onMouseOut={(e) => !loading && (e.currentTarget.style.backgroundColor = '#2563EB')}
         >
-          Войти
+          {loading ? 'Ожидание авторизации в Telegram...' : 'Войти'}
         </button>
       </div>
     </section>
