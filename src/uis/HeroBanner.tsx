@@ -1,9 +1,17 @@
 import { useState } from 'react';
 
-const TABS = ['Пешая арена', 'Флот', 'Рейтинг', 'История'];
+const TABS = ['Пешая арена', 'Флот', 'Рейтинг', 'История'] as const;
+type TabType = (typeof TABS)[number];
+
+const TITLES: Record<TabType, string> = {
+  'Пешая арена': 'sWGoH Рейтинг & Меты Пешей Арены',
+  'Флот': 'sWGoH Рейтинг & Меты Арены Флота',
+  'Рейтинг': 'sWGoH Рейтинг & Меты Арены',
+  'История': 'sWGoH История Боев На Пешей Арене и Арене Флота',
+};
 
 export const HeroBanner = () => {
-  const [activeTab, setActiveTab] = useState('Пешая арена');
+  const [activeTab, setActiveTab] = useState<TabType>('Пешая арена');
 
   return (
     <section
@@ -22,10 +30,10 @@ export const HeroBanner = () => {
             lineHeight: 1.15,
             letterSpacing: '-0.02em',
             color: '#ffffff',
-            maxWidth: '700px',
+            maxWidth: '750px',
           }}
         >
-          sWGoH Рейтинг & Меты Пешей Арены
+          {TITLES[activeTab]}
         </h1>
 
         <div
@@ -63,7 +71,7 @@ export const HeroBanner = () => {
                       right: 0,
                       height: '3px',
                       backgroundColor: '#2563EB',
-                      borderRadius: '3px 3px 0 0',
+                      borderRadius: 0,
                     }}
                   />
                 )}
