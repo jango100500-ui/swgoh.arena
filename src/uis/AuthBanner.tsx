@@ -9,30 +9,19 @@ export const AuthBanner = () => {
       const res = await fetch('https://arena-tracker-2uod.onrender.com/api/auth/start-session', {
         method: 'POST',
       });
+      
+      if (!res.ok) {
+        throw new Error(`Server returned ${res.status}`);
+      }
+
       const data = await res.json();
 
       if (!data.botUrl || !data.sessionToken) {
-        throw new Error('Failed to get bot session');
+        throw new Error('Invalid server response');
       }
 
-      window.open(data.botUrl, '_blank');
-
-      const interval = setInterval(async () => {
-        try {
-          const checkRes = await fetch(
-            `https://arena-tracker-2uod.onrender.com/api/auth/check-session?token=${encodeURIComponent(data.sessionToken)}`
-          );
-          const checkData = await checkRes.json();
-
-          if (checkData.status === 'approved' && checkData.authToken) {
-            clearInterval(interval);
-            localStorage.setItem('arena_token', checkData.authToken);
-            window.location.reload();
-          }
-        } catch {
-          // Continue polling
-        }
-      }, 2000);
+      localStorage.setItem('pending_auth_session', data.sessionToken);
+      window.location.href = data.botUrl;
     } catch {
       setLoading(false);
     }
@@ -108,7 +97,7 @@ export const AuthBanner = () => {
           onMouseOver={(e) => !loading && (e.currentTarget.style.backgroundColor = '#1d4ed8')}
           onMouseOut={(e) => !loading && (e.currentTarget.style.backgroundColor = '#2563EB')}
         >
-          {loading ? 'Ожидание авторизации в Telegram...' : 'Войти'}
+          {loading ? 'Перенаправляем в Telegram...' : 'Войти'}
         </button>
       </div>
     </section>
