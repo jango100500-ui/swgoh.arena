@@ -23,7 +23,8 @@ from aiogram.types import (
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 DATABASE_URL = os.getenv("DATABASE_URL")
-PROXY_URL = os.getenv("PROXY_URL", "https://arena-tracker-2uod.onrender.com").rstrip("/")
+PROXY_URL = os.getenv("PROXY_URL", "https://arena-tracker-proxy.onrender.com").rstrip("/")
+BOT_USERNAME = os.getenv("BOT_USERNAME", "swgoh_arena_bot")
 PORT = int(os.getenv("PORT", 8080))
 
 if not BOT_TOKEN or not DATABASE_URL:
@@ -71,17 +72,18 @@ async def complete_session_in_db(session_token: str, ally_code: str, telegram_id
     async with db_pool.acquire() as conn:
         await conn.execute(
             """
-            UPDATE auth_sessions
+            INSERT INTO auth_sessions (session_token, status, ally_code, telegram_id, auth_token)
+            VALUES ($1, 'approved', $2, $3, $4)
+            ON CONFLICT (session_token) DO UPDATE
             SET status = 'approved',
-                ally_code = $1,
-                telegram_id = $2,
-                auth_token = $3
-            WHERE session_token = $4
+                ally_code = EXCLUDED.ally_code,
+                telegram_id = EXCLUDED.telegram_id,
+                auth_token = EXCLUDED.auth_token
             """,
+            session_token,
             ally_code,
             telegram_id,
-            auth_token,
-            session_token
+            auth_token
         )
 
 @dp.message(CommandStart())
@@ -394,8 +396,100 @@ async def on_verify_portrait_check(callback: CallbackQuery, state: FSMContext):
 async def on_noop(callback: CallbackQuery):
     await callback.answer()
 
+def cors_response(data, status=200):
+    return web.json_response(
+        data,
+        status=status,
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization",
+        }
+    )
+
+async def options_handler(request):
+    return web.Response(
+        status=204,
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization",
+        }
+    )
+
+async def start_session_handler(request):
+    token = f"auth_{secrets.token_hex(16)}"
+    async with db_pool.acquire() as conn:
+        await conn.execute(
+            "INSERT INTO auth_sessions (session_token, status) VALUES ($1, 'pending')",
+            token
+        )
+    return cors_response({
+        "sessionToken": token,
+        "botUrl": f"https://t.me/{BOT_USERNAME}?start={token}"
+    })
+
+async def check_session_handler(request):
+    token = request.query.get("token")
+    if not token:
+        return cors_response({"error": "token required"}, status=400)
+
+    async with db_pool.acquire() as conn:
+        row = await conn.fetchrow(
+            """
+            SELECT s.status, s.auth_token, u.ally_code, u.player_name, u.portrait_id, u.guild_name
+            FROM auth_sessions s
+            LEFT JOIN users u ON s.ally_code = u.ally_code
+            WHERE s.session_token = $1 AND s.expires_at > NOW()
+            """,
+            token
+        )
+
+    if not row:
+        return cors_response({"error": "Session expired or not found"}, status=404)
+
+    if row["status"] == "approved":
+        return cors_response({
+            "status": "approved",
+            "authToken": row["auth_token"],
+            "user": {
+                "allyCode": row["ally_code"],
+                "playerName": row["player_name"],
+                "portraitId": row["portrait_id"],
+                "guildName": row["guild_name"]
+            }
+        })
+
+    return cors_response({"status": "pending"})
+
+async def me_handler(request):
+    auth_header = request.headers.get("Authorization", "")
+    if not auth_header.startswith("Bearer "):
+        return cors_response({"error": "Unauthorized"}, status=401)
+
+    token = auth_header.split(" ")[1]
+    async with db_pool.acquire() as conn:
+        user = await conn.fetchrow(
+            """
+            UPDATE users SET last_active_at = NOW()
+            WHERE auth_token = $1
+            RETURNING ally_code, player_name, portrait_id, guild_name
+            """,
+            token
+        )
+
+    if not user:
+        return cors_response({"error": "Invalid token"}, status=401)
+
+    return cors_response({
+        "allyCode": user["ally_code"],
+        "playerName": user["player_name"],
+        "portraitId": user["portrait_id"],
+        "guildName": user["guild_name"]
+    })
+
 async def health_check_handler(request):
-    return web.Response(text="Bot is running OK", status=200)
+    return web.Response(text="Bot OK", status=200)
 
 async def main():
     global db_pool
@@ -407,8 +501,12 @@ async def main():
     )
 
     app = web.Application()
+    app.router.add_route("OPTIONS", "/{tail:.*}", options_handler)
     app.router.add_get("/", health_check_handler)
     app.router.add_get("/health", health_check_handler)
+    app.router.add_post("/api/auth/start-session", start_session_handler)
+    app.router.add_get("/api/auth/check-session", check_session_handler)
+    app.router.add_get("/api/auth/me", me_handler)
 
     runner = web.AppRunner(app)
     await runner.setup()
