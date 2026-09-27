@@ -14,20 +14,20 @@ export const Toast = ({ type, text, isLeaving }: ToastProps) => {
       style={{
         position: 'fixed',
         top: '80px',
-        right: '24px',
+        left: '50%',
         zIndex: 1000,
         backgroundColor: '#0e1422',
-        backgroundImage: `linear-gradient(to right, ${gradientColor}, transparent 55%)`,
+        backgroundImage: `linear-gradient(to right, ${gradientColor}, transparent 45%)`,
         borderRadius: '6px',
-        padding: '14px 20px 18px',
-        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.45)',
+        padding: '16px 24px 20px',
+        boxShadow: '0 12px 32px rgba(0, 0, 0, 0.55)',
         display: 'flex',
         alignItems: 'center',
-        gap: '12px',
-        minWidth: '260px',
-        maxWidth: '380px',
+        gap: '14px',
+        width: 'calc(100% - 48px)',
+        maxWidth: '800px',
         overflow: 'hidden',
-        animation: isLeaving ? 'toastSlideOut 0.3s ease forwards' : 'toastSlideIn 0.25s ease forwards',
+        animation: isLeaving ? 'toastExitLeft 0.35s ease forwards' : 'toastEnterTop 0.25s ease forwards',
       }}
     >
       <div
@@ -54,7 +54,7 @@ export const Toast = ({ type, text, isLeaving }: ToastProps) => {
         )}
       </div>
 
-      <span style={{ fontSize: '14px', fontWeight: 700, color: '#ffffff' }}>
+      <span style={{ fontSize: '15px', fontWeight: 700, color: '#ffffff' }}>
         {text}
       </span>
 
