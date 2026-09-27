@@ -40,6 +40,23 @@ button {
   cursor: pointer;
 }
 
+.custom-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+  background: #090e18;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 4px;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+
 @keyframes placeholderExitDown {
   0% { transform: translateY(0); opacity: 1; }
   100% { transform: translateY(100%); opacity: 0; }
