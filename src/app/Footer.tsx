@@ -104,15 +104,12 @@ export const Footer = () => {
           margin: '40px auto 0',
           paddingTop: '20px',
           borderTop: '1px solid #0d131f',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '6px',
+          textAlign: 'center',
           fontSize: '12px',
           color: '#475569',
         }}
       >
         <p>swgoh.arena не связан с EA, EA Capital Games, Disney или Lucasfilm LTD.</p>
-        <p>© {new Date().getFullYear()} swgoh.arena. Все права защищены.</p>
       </div>
     </footer>
   );
