@@ -1,15 +1,15 @@
 import { SearchInput } from '../uis/SearchInput';
-import { useAuth } from './useAuth';
+import { UserProfile } from './useAuth';
 
 interface HeaderProps {
+  user: UserProfile | null;
+  isAuthenticated: boolean;
   showSearch?: boolean;
   onOpenProfile: () => void;
   onNavigateHome: () => void;
 }
 
-export const Header = ({ showSearch = true, onOpenProfile, onNavigateHome }: HeaderProps) => {
-  const { user, isAuthenticated } = useAuth();
-
+export const Header = ({ user, isAuthenticated, showSearch = true, onOpenProfile, onNavigateHome }: HeaderProps) => {
   return (
     <header
       style={{
