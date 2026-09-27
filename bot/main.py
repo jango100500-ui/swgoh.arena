@@ -4,6 +4,7 @@ import secrets
 import time
 import random
 import aiohttp
+from aiohttp import web
 import asyncpg
 from aiogram import Bot, Dispatcher, F
 from aiogram.enums import ParseMode
@@ -23,6 +24,7 @@ from aiogram.types import (
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 DATABASE_URL = os.getenv("DATABASE_URL")
 PROXY_URL = os.getenv("PROXY_URL", "https://arena-tracker-proxy.onrender.com")
+PORT = int(os.getenv("PORT", 8080))
 
 if not BOT_TOKEN or not DATABASE_URL:
     raise ValueError("BOT_TOKEN and DATABASE_URL environment variables are required")
@@ -386,6 +388,9 @@ async def on_verify_portrait_check(callback: CallbackQuery, state: FSMContext):
 async def on_noop(callback: CallbackQuery):
     await callback.answer()
 
+async def health_check_handler(request):
+    return web.Response(text="Bot is running OK", status=200)
+
 async def main():
     global db_pool
     db_pool = await asyncpg.create_pool(
@@ -394,9 +399,20 @@ async def main():
         max_size=10,
         ssl="require"
     )
+
+    app = web.Application()
+    app.router.add_get("/", health_check_handler)
+    app.router.add_get("/health", health_check_handler)
+
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, "0.0.0.0", PORT)
+    await site.start()
+
     try:
         await dp.start_polling(bot)
     finally:
+        await runner.cleanup()
         await db_pool.close()
 
 if __name__ == "__main__":
