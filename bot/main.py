@@ -24,7 +24,7 @@ from aiogram.types import (
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 DATABASE_URL = os.getenv("DATABASE_URL")
 PROXY_URL = os.getenv("PROXY_URL", "https://arena-tracker-proxy.onrender.com").rstrip("/")
-BOT_USERNAME = os.getenv("BOT_USERNAME", "swgoh_arena_bot")
+BOT_USERNAME = os.getenv("BOT_USERNAME", "SwgohArena_Bot").lstrip("@")
 PORT = int(os.getenv("PORT", 8080))
 
 if not BOT_TOKEN or not DATABASE_URL:
