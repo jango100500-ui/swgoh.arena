@@ -109,7 +109,7 @@ export const Footer = () => {
           color: '#475569',
         }}
       >
-        <p>swgoh.arena не связан с EA, EA Capital Games, Disney или Lucasfilm LTD.</p>
+        <p>swgoh.arena не связан с EA, EA Capital Games, Disney или Lucasfilm LTD</p>
       </div>
     </footer>
   );
