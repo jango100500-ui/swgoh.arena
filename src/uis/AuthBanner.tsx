@@ -1,26 +1,24 @@
 import { useState } from 'react';
 
+const BOT_API = 'https://swgoh-arena-bot.onrender.com';
+
 export const AuthBanner = () => {
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
     setLoading(true);
     try {
-      const res = await fetch('https://arena-tracker-2uod.onrender.com/api/auth/start-session', {
+      const res = await fetch(`${BOT_API}/api/auth/start-session`, {
         method: 'POST',
       });
-      
+
       if (!res.ok) {
-        throw new Error(`Server returned ${res.status}`);
+        throw new Error();
       }
 
       const data = await res.json();
+      localStorage.setItem('pending_session', data.sessionToken);
 
-      if (!data.botUrl || !data.sessionToken) {
-        throw new Error('Invalid server response');
-      }
-
-      localStorage.setItem('pending_auth_session', data.sessionToken);
       window.location.href = data.botUrl;
     } catch {
       setLoading(false);
