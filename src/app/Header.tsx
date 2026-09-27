@@ -18,16 +18,16 @@ export const Header = () => {
         gap: '16px',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0, flexShrink: 0 }}>
-        <img
-          src="/pngs/arena.png"
-          alt="Arena Logo"
-          style={{ width: '32px', height: '32px', objectFit: 'contain', flexShrink: 0 }}
-        />
-        <span style={{ fontSize: '18px', fontWeight: 800, letterSpacing: '-0.02em', color: '#ffffff', whiteSpace: 'nowrap' }}>
-          swgoh<span style={{ color: '#2563EB' }}>.arena</span>
-        </span>
-      </div>
+      <img
+        src="/pngs/arena.png"
+        alt="swgoh.arena"
+        style={{
+          height: '32px',
+          width: 'auto',
+          objectFit: 'contain',
+          flexShrink: 0,
+        }}
+      />
 
       <SearchInput />
     </header>
