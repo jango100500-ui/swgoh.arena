@@ -17,11 +17,20 @@ const BACKGROUNDS: Record<TabType, string> = {
   'История': '/pngs/space.png',
 };
 
-export const HeroBanner = () => {
+interface HeroBannerProps {
+  onTabChange?: (tab: TabType) => void;
+}
+
+export const HeroBanner = ({ onTabChange }: HeroBannerProps) => {
   const [activeTab, setActiveTab] = useState<TabType>('Пешая арена');
 
   const isSpace = activeTab === 'Рейтинг' || activeTab === 'История';
   const bgOpacity = isSpace ? 0.22 : 0.12;
+
+  const handleTabClick = (tab: TabType) => {
+    setActiveTab(tab);
+    onTabChange?.(tab);
+  };
 
   return (
     <section
@@ -75,7 +84,7 @@ export const HeroBanner = () => {
             return (
               <button
                 key={tab}
-                onClick={() => setActiveTab(tab)}
+                onClick={() => handleTabClick(tab)}
                 style={{
                   position: 'relative',
                   paddingBottom: '14px',
