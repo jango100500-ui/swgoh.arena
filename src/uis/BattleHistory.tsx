@@ -21,11 +21,13 @@ interface BattleEvent {
   squad?: UnitSnapshot[];
 }
 
-type PeriodFilter = 'Сегодня' | 'За Неделю' | 'За Месяц';
+type PeriodFilter = 'За все время' | 'Сегодня' | 'За Неделю' | 'За Месяц';
+
+const FILTERS: PeriodFilter[] = ['За все время', 'Сегодня', 'За Неделю', 'За Месяц'];
 
 export const BattleHistory = ({ user }: BattleHistoryProps) => {
   const [history, setHistory] = useState<BattleEvent[]>([]);
-  const [activeFilter, setActiveFilter] = useState<PeriodFilter>('Сегодня');
+  const [activeFilter, setActiveFilter] = useState<PeriodFilter>('За все время');
 
   const storageKey = `arena_tracker_history_${user.allyCode}`;
 
@@ -40,12 +42,17 @@ export const BattleHistory = ({ user }: BattleHistoryProps) => {
     }
   }, [storageKey]);
 
+  const handleFilterClick = (filter: PeriodFilter) => {
+    setActiveFilter(filter);
+  };
+
   const now = Date.now();
   const startOfToday = new Date().setHours(0, 0, 0, 0);
   const oneWeekAgo = now - 7 * 24 * 60 * 60 * 1000;
   const oneMonthAgo = now - 30 * 24 * 60 * 60 * 1000;
 
   const filteredHistory = history.filter((event) => {
+    if (activeFilter === 'За все время') return true;
     if (activeFilter === 'Сегодня') return event.time >= startOfToday;
     if (activeFilter === 'За Неделю') return event.time >= oneWeekAgo;
     if (activeFilter === 'За Месяц') return event.time >= oneMonthAgo;
@@ -65,14 +72,16 @@ export const BattleHistory = ({ user }: BattleHistoryProps) => {
           display: 'flex',
           alignItems: 'center',
           gap: '8px',
+          overflowX: 'auto',
+          scrollbarWidth: 'none',
         }}
       >
-        {(['Сегодня', 'За Неделю', 'За Месяц'] as PeriodFilter[]).map((filter) => {
+        {FILTERS.map((filter) => {
           const isActive = activeFilter === filter;
           return (
             <button
               key={filter}
-              onClick={() => setActiveFilter(filter)}
+              onClick={() => handleFilterClick(filter)}
               style={{
                 fontSize: '13px',
                 fontWeight: 700,
@@ -80,7 +89,9 @@ export const BattleHistory = ({ user }: BattleHistoryProps) => {
                 borderRadius: '6px',
                 backgroundColor: isActive ? '#2563EB' : '#0e1422',
                 color: isActive ? '#ffffff' : '#64748b',
+                whiteSpace: 'nowrap',
                 transition: 'background-color 0.15s ease, color 0.15s ease',
+                flexShrink: 0,
               }}
               onMouseEnter={(e) => {
                 if (!isActive) e.currentTarget.style.color = '#cbd5e1';
