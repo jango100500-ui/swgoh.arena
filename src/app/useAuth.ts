@@ -11,6 +11,11 @@ export interface UserProfile {
 }
 
 export const useAuth = () => {
+  if (typeof window !== 'undefined' && window.location.search.includes('logout')) {
+    localStorage.clear();
+    window.location.href = window.location.origin + window.location.pathname;
+  }
+
   const [user, setUser] = useState<UserProfile | null>(() => {
     try {
       const cached = localStorage.getItem('arena_user');
@@ -84,7 +89,7 @@ export const useAuth = () => {
         }
       })
       .catch(() => {
-        // Keep cached user on network glitch
+        // Keep cached user
       })
       .finally(() => {
         setIsLoading(false);
@@ -101,9 +106,7 @@ export const useAuth = () => {
   };
 
   const logout = () => {
-    localStorage.removeItem('arena_token');
-    localStorage.removeItem('arena_user');
-    localStorage.removeItem('pending_session');
+    localStorage.clear();
     setUser(null);
     window.location.reload();
   };
