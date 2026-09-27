@@ -7,7 +7,14 @@ const TITLES: Record<TabType, string> = {
   'Пешая арена': 'sWGoH Рейтинг & Меты Пешей Арены',
   'Флот': 'sWGoH Рейтинг & Меты Арены Флота',
   'Рейтинг': 'sWGoH Рейтинг & Меты Арены',
-  'История': 'sWGoH История Боев На Пешей Арене и Арене Флота',
+  'История': 'sWGoH История Боев На Арене',
+};
+
+const BACKGROUNDS: Record<TabType, string> = {
+  'Пешая арена': '/pngs/packs.png',
+  'Флот': '/pngs/fleet.png',
+  'Рейтинг': '/pngs/space.png',
+  'История': '/pngs/space.png',
 };
 
 export const HeroBanner = () => {
@@ -16,13 +23,28 @@ export const HeroBanner = () => {
   return (
     <section
       style={{
+        position: 'relative',
         width: '100%',
         backgroundColor: '#04070e',
         borderBottom: '1px solid #0e1626',
         padding: '36px 24px 0',
+        overflow: 'hidden',
       }}
     >
-      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          backgroundImage: `url(${BACKGROUNDS[activeTab]})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          opacity: 0.12,
+          pointerEvents: 'none',
+          transition: 'background-image 0.2s ease',
+        }}
+      />
+
+      <div style={{ position: 'relative', zIndex: 1, maxWidth: '1200px', margin: '0 auto' }}>
         <h1
           style={{
             fontSize: '32px',
