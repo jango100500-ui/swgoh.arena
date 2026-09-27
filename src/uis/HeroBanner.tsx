@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Breadcrumbs } from './Breadcrumbs';
 
 const TABS = ['Пешая арена', 'Флот', 'Рейтинг', 'История'] as const;
 type TabType = (typeof TABS)[number];
@@ -18,10 +19,12 @@ const BACKGROUNDS: Record<TabType, string> = {
 };
 
 interface HeroBannerProps {
+  breadcrumbCurrent: string;
+  onNavigateHome: () => void;
   onTabChange?: (tab: TabType) => void;
 }
 
-export const HeroBanner = ({ onTabChange }: HeroBannerProps) => {
+export const HeroBanner = ({ breadcrumbCurrent, onNavigateHome, onTabChange }: HeroBannerProps) => {
   const [activeTab, setActiveTab] = useState<TabType>('Пешая арена');
 
   const isSpace = activeTab === 'Рейтинг' || activeTab === 'История';
@@ -39,7 +42,7 @@ export const HeroBanner = ({ onTabChange }: HeroBannerProps) => {
         width: '100%',
         backgroundColor: '#04070e',
         borderBottom: '1px solid #0e1626',
-        padding: '36px 24px 0',
+        padding: '0 24px',
         overflow: 'hidden',
       }}
     >
@@ -57,6 +60,8 @@ export const HeroBanner = ({ onTabChange }: HeroBannerProps) => {
       />
 
       <div style={{ position: 'relative', zIndex: 1, maxWidth: '1200px', margin: '0 auto' }}>
+        <Breadcrumbs current={breadcrumbCurrent} onNavigateHome={onNavigateHome} />
+
         <h1
           style={{
             fontSize: '32px',
@@ -65,6 +70,7 @@ export const HeroBanner = ({ onTabChange }: HeroBannerProps) => {
             letterSpacing: '-0.02em',
             color: '#ffffff',
             maxWidth: '750px',
+            marginTop: '8px',
           }}
         >
           {TITLES[activeTab]}
