@@ -7,11 +7,13 @@ import { useAuth } from './useAuth';
 
 export const App = () => {
   const [currentView, setCurrentView] = useState<'home' | 'profile'>('home');
-  const { user, updateUser } = useAuth();
+  const { user, isAuthenticated, updateUser } = useAuth();
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <Header
+        user={user}
+        isAuthenticated={isAuthenticated}
         showSearch={currentView === 'home'}
         onOpenProfile={() => setCurrentView('profile')}
         onNavigateHome={() => setCurrentView('home')}
