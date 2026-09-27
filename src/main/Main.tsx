@@ -6,9 +6,9 @@ export const Main = () => {
   const { isAuthenticated, isLoading } = useAuth();
 
   return (
-    <main style={{ display: 'flex', flexDirection: 'column', minHeight: 'calc(100vh - 64px)' }}>
+    <main style={{ display: 'flex', flexDirection: 'column' }}>
       <HeroBanner />
-      <div style={{ padding: '0 24px', width: '100%', flex: 1 }}>
+      <div style={{ padding: '0 24px', width: '100%', margin: '0 auto 40px' }}>
         {!isLoading && !isAuthenticated && <AuthBanner />}
       </div>
     </main>
