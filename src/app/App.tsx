@@ -7,7 +7,7 @@ import { useAuth } from './useAuth';
 
 export const App = () => {
   const [currentView, setCurrentView] = useState<'home' | 'profile'>('home');
-  const { user, isAuthenticated, updateUser, logout } = useAuth();
+  const { user, isAuthenticated, isLoading, updateUser, logout } = useAuth();
 
   const handleLogout = () => {
     logout();
@@ -32,7 +32,11 @@ export const App = () => {
             onNavigateHome={() => setCurrentView('home')}
           />
         ) : (
-          <Main />
+          <Main
+            user={user}
+            isAuthenticated={isAuthenticated}
+            isLoading={isLoading}
+          />
         )}
       </div>
       <Footer />
