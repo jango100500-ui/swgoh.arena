@@ -43,21 +43,32 @@ app.get('/profile', async (req, res) => {
   }
 
   const clean = String(allyCode).replace(/\D/g, '');
+  console.log(`[PROFILE] Fetching allyCode: ${clean} from ${COMLINK_URL}`);
 
   try {
-    const response = await fetch(`${COMLINK_URL}/player`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ payload: { allyCode: clean } })
-    });
-
-    if (!response.ok) {
-      return res.status(response.status).json({ error: 'Player not found in SWGOH' });
+    let response = await fetch(`${COMLINK_URL}/profile?allyCode=${clean}`);
+    
+    if (response.ok) {
+      const data = await response.json();
+      return res.json(data);
     }
 
-    const data = await response.json();
-    res.json(data);
+    response = await fetch(`${COMLINK_URL}/player`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ payload: { allyCode: clean }, enums: false })
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return res.json(data);
+    }
+
+    const errText = await response.text();
+    console.error(`[PROFILE ERROR] Comlink status ${response.status}: ${errText}`);
+    res.status(response.status).json({ error: `Comlink error ${response.status}`, details: errText });
   } catch (error) {
+    console.error('[PROFILE EXCEPTION]', error);
     res.status(500).json({ error: error.message });
   }
 });
