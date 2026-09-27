@@ -1,8 +1,5 @@
-import { useState } from 'react';
-import { Breadcrumbs } from './Breadcrumbs';
-
 const TABS = ['Пешая арена', 'Флот', 'Рейтинг', 'История'] as const;
-type TabType = (typeof TABS)[number];
+export type TabType = (typeof TABS)[number];
 
 const TITLES: Record<TabType, string> = {
   'Пешая арена': 'sWGoH Рейтинг & Меты Пешей Арены',
@@ -19,21 +16,20 @@ const BACKGROUNDS: Record<TabType, string> = {
 };
 
 interface HeroBannerProps {
+  activeTab: TabType;
   breadcrumbCurrent: string;
   onNavigateHome: () => void;
-  onTabChange?: (tab: TabType) => void;
+  onTabChange: (tab: TabType) => void;
 }
 
-export const HeroBanner = ({ breadcrumbCurrent, onNavigateHome, onTabChange }: HeroBannerProps) => {
-  const [activeTab, setActiveTab] = useState<TabType>('Пешая арена');
-
+export const HeroBanner = ({
+  activeTab,
+  breadcrumbCurrent,
+  onNavigateHome,
+  onTabChange,
+}: HeroBannerProps) => {
   const isSpace = activeTab === 'Рейтинг' || activeTab === 'История';
   const bgOpacity = isSpace ? 0.22 : 0.12;
-
-  const handleTabClick = (tab: TabType) => {
-    setActiveTab(tab);
-    onTabChange?.(tab);
-  };
 
   return (
     <section
@@ -60,7 +56,20 @@ export const HeroBanner = ({ breadcrumbCurrent, onNavigateHome, onTabChange }: H
       />
 
       <div style={{ position: 'relative', zIndex: 1, maxWidth: '1200px', margin: '0 auto' }}>
-        <Breadcrumbs current={breadcrumbCurrent} onNavigateHome={onNavigateHome} />
+        <div style={{ padding: '24px 0 16px', fontSize: '13px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              onClick={onNavigateHome}
+              style={{ color: '#64748b', fontWeight: 600 }}
+              onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')}
+              onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}
+            >
+              Главная
+            </button>
+            <span style={{ color: '#334155' }}>›</span>
+            <span style={{ color: '#94a3b8', fontWeight: 600 }}>{breadcrumbCurrent}</span>
+          </div>
+        </div>
 
         <h1
           style={{
@@ -90,7 +99,7 @@ export const HeroBanner = ({ breadcrumbCurrent, onNavigateHome, onTabChange }: H
             return (
               <button
                 key={tab}
-                onClick={() => handleTabClick(tab)}
+                onClick={() => onTabChange(tab)}
                 style={{
                   position: 'relative',
                   paddingBottom: '14px',
