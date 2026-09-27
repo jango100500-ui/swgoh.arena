@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { HeroBanner, TabType } from '../uis/HeroBanner';
 import { AuthBanner } from '../uis/AuthBanner';
 import { SquadArena } from '../uis/SquadArena';
+import { BattleHistory } from '../uis/BattleHistory';
 import { useAuth } from '../app/useAuth';
 
 export const Main = () => {
@@ -22,6 +23,9 @@ export const Main = () => {
         {!isLoading && !isAuthenticated && <AuthBanner />}
         {!isLoading && isAuthenticated && user && activeTab === 'Пешая арена' && (
           <SquadArena user={user} onViewHistory={() => setActiveTab('История')} />
+        )}
+        {!isLoading && isAuthenticated && user && activeTab === 'История' && (
+          <BattleHistory user={user} />
         )}
       </div>
     </main>
