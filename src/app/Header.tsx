@@ -1,7 +1,13 @@
 import { SearchInput } from '../uis/SearchInput';
 import { useAuth } from './useAuth';
 
-export const Header = () => {
+interface HeaderProps {
+  showSearch?: boolean;
+  onOpenProfile: () => void;
+  onNavigateHome: () => void;
+}
+
+export const Header = ({ showSearch = true, onOpenProfile, onNavigateHome }: HeaderProps) => {
   const { user, isAuthenticated } = useAuth();
 
   return (
@@ -21,7 +27,10 @@ export const Header = () => {
         gap: '16px',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flexShrink: 0 }}>
+      <div
+        onClick={onNavigateHome}
+        style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flexShrink: 0, cursor: 'pointer' }}
+      >
         <img
           src="/pngs/favicon.png"
           alt="Logo"
@@ -38,9 +47,10 @@ export const Header = () => {
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <SearchInput />
+        {showSearch && <SearchInput />}
 
         <div
+          onClick={isAuthenticated ? onOpenProfile : undefined}
           style={{
             width: '36px',
             height: '36px',
@@ -51,6 +61,7 @@ export const Header = () => {
             alignItems: 'center',
             justifyContent: 'center',
             flexShrink: 0,
+            cursor: isAuthenticated ? 'pointer' : 'default',
             border: isAuthenticated ? '1px solid #1e293b' : '1px solid #111726',
           }}
         >
