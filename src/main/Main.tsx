@@ -3,10 +3,15 @@ import { HeroBanner, TabType } from '../uis/HeroBanner';
 import { AuthBanner } from '../uis/AuthBanner';
 import { SquadArena } from '../uis/SquadArena';
 import { BattleHistory } from '../uis/BattleHistory';
-import { useAuth } from '../app/useAuth';
+import { UserProfile } from '../app/useAuth';
 
-export const Main = () => {
-  const { user, isAuthenticated, isLoading } = useAuth();
+interface MainProps {
+  user: UserProfile | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+}
+
+export const Main = ({ user, isAuthenticated, isLoading }: MainProps) => {
   const [activeTab, setActiveTab] = useState<TabType>('Пешая арена');
 
   const breadcrumbCurrent = !isAuthenticated && !isLoading ? 'Вход' : activeTab;
