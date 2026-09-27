@@ -21,13 +21,12 @@ interface BattleEvent {
   squad?: UnitSnapshot[];
 }
 
-type PeriodFilter = 'За все время' | 'Сегодня' | 'За Неделю' | 'За Месяц';
-
-const FILTERS: PeriodFilter[] = ['За все время', 'Сегодня', 'За Неделю', 'За Месяц'];
+type FilterOption = 'За все время' | 'Сегодня' | 'За Неделю' | 'За Месяц';
+const FILTER_OPTIONS: FilterOption[] = ['За все время', 'Сегодня', 'За Неделю', 'За Месяц'];
 
 export const BattleHistory = ({ user }: BattleHistoryProps) => {
   const [history, setHistory] = useState<BattleEvent[]>([]);
-  const [activeFilter, setActiveFilter] = useState<PeriodFilter>('За все время');
+  const [activeFilters, setActiveFilters] = useState<FilterOption[]>(['За все время']);
 
   const storageKey = `arena_tracker_history_${user.allyCode}`;
 
@@ -42,8 +41,29 @@ export const BattleHistory = ({ user }: BattleHistoryProps) => {
     }
   }, [storageKey]);
 
-  const handleFilterClick = (filter: PeriodFilter) => {
-    setActiveFilter(filter);
+  const handleFilterClick = (filter: FilterOption) => {
+    if (filter === 'За все время') {
+      setActiveFilters(['За все время']);
+      return;
+    }
+
+    setActiveFilters((prev) => {
+      const withoutAllTime = prev.filter((f) => f !== 'За все время');
+      const isAlreadySelected = withoutAllTime.includes(filter);
+
+      let next: FilterOption[];
+      if (isAlreadySelected) {
+        next = withoutAllTime.filter((f) => f !== filter);
+      } else {
+        next = [...withoutAllTime, filter];
+      }
+
+      if (next.length === 0) {
+        return ['За все время'];
+      }
+
+      return next;
+    });
   };
 
   const now = Date.now();
@@ -52,11 +72,13 @@ export const BattleHistory = ({ user }: BattleHistoryProps) => {
   const oneMonthAgo = now - 30 * 24 * 60 * 60 * 1000;
 
   const filteredHistory = history.filter((event) => {
-    if (activeFilter === 'За все время') return true;
-    if (activeFilter === 'Сегодня') return event.time >= startOfToday;
-    if (activeFilter === 'За Неделю') return event.time >= oneWeekAgo;
-    if (activeFilter === 'За Месяц') return event.time >= oneMonthAgo;
-    return true;
+    if (activeFilters.includes('За все время')) return true;
+
+    const matchesToday = activeFilters.includes('Сегодня') && event.time >= startOfToday;
+    const matchesWeek = activeFilters.includes('За Неделю') && event.time >= oneWeekAgo;
+    const matchesMonth = activeFilters.includes('За Месяц') && event.time >= oneMonthAgo;
+
+    return matchesToday || matchesWeek || matchesMonth;
   });
 
   return (
@@ -76,8 +98,8 @@ export const BattleHistory = ({ user }: BattleHistoryProps) => {
           scrollbarWidth: 'none',
         }}
       >
-        {FILTERS.map((filter) => {
-          const isActive = activeFilter === filter;
+        {FILTER_OPTIONS.map((filter) => {
+          const isActive = activeFilters.includes(filter);
           return (
             <button
               key={filter}
@@ -90,8 +112,8 @@ export const BattleHistory = ({ user }: BattleHistoryProps) => {
                 backgroundColor: isActive ? '#2563EB' : '#0e1422',
                 color: isActive ? '#ffffff' : '#64748b',
                 whiteSpace: 'nowrap',
-                transition: 'background-color 0.15s ease, color 0.15s ease',
                 flexShrink: 0,
+                transition: 'background-color 0.15s ease, color 0.15s ease',
               }}
               onMouseEnter={(e) => {
                 if (!isActive) e.currentTarget.style.color = '#cbd5e1';
