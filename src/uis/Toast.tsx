@@ -27,7 +27,9 @@ export const Toast = ({ type, text, isLeaving }: ToastProps) => {
         width: 'calc(100% - 48px)',
         maxWidth: '800px',
         overflow: 'hidden',
-        animation: isLeaving ? 'toastExitLeft 0.35s ease forwards' : 'toastEnterTop 0.25s ease forwards',
+        animation: isLeaving
+          ? 'toastExitToRight 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards'
+          : 'toastEnterFromLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards',
       }}
     >
       <div
