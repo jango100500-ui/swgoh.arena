@@ -11,11 +11,20 @@ export interface UserProfile {
 }
 
 export const useAuth = () => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [user, setUser] = useState<UserProfile | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(() => {
+    try {
+      const cached = localStorage.getItem('arena_user');
+      return cached ? JSON.parse(cached) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const [isLoading, setIsLoading] = useState(!user);
 
   useEffect(() => {
     const pendingSession = localStorage.getItem('pending_session');
+    const existingToken = localStorage.getItem('arena_token');
 
     if (pendingSession) {
       const checkSession = async () => {
@@ -27,24 +36,28 @@ export const useAuth = () => {
           if (data?.status === 'approved' && data.authToken) {
             localStorage.removeItem('pending_session');
             localStorage.setItem('arena_token', data.authToken);
+            if (data.user) {
+              localStorage.setItem('arena_user', JSON.stringify(data.user));
+              setUser(data.user);
+            }
             window.location.reload();
           }
         } catch {
-          // Keep polling
+          // Polling
         }
       };
 
       checkSession();
-      const interval = setInterval(checkSession, 2000);
-      window.addEventListener('focus', checkSession);
+      const interval = setInterval(checkSession, 2500);
+
+      const onFocus = () => checkSession();
+      window.addEventListener('focus', onFocus);
 
       return () => {
         clearInterval(interval);
-        window.removeEventListener('focus', checkSession);
+        window.removeEventListener('focus', onFocus);
       };
     }
-
-    const existingToken = localStorage.getItem('arena_token');
 
     if (!existingToken) {
       setIsLoading(false);
@@ -57,16 +70,21 @@ export const useAuth = () => {
         Authorization: `Bearer ${existingToken}`,
       },
     })
-      .then((res) => {
-        if (!res.ok) throw new Error();
-        return res.json();
-      })
-      .then((data: UserProfile) => {
-        setUser(data);
+      .then(async (res) => {
+        if (res.status === 401) {
+          localStorage.removeItem('arena_token');
+          localStorage.removeItem('arena_user');
+          setUser(null);
+          return;
+        }
+        if (res.ok) {
+          const data: UserProfile = await res.json();
+          localStorage.setItem('arena_user', JSON.stringify(data));
+          setUser(data);
+        }
       })
       .catch(() => {
-        localStorage.removeItem('arena_token');
-        setUser(null);
+        // Keep cached user on network glitch
       })
       .finally(() => {
         setIsLoading(false);
@@ -74,11 +92,17 @@ export const useAuth = () => {
   }, []);
 
   const updateUser = (updated: Partial<UserProfile>) => {
-    setUser((prev) => (prev ? { ...prev, ...updated } : null));
+    setUser((prev) => {
+      if (!prev) return null;
+      const merged = { ...prev, ...updated };
+      localStorage.setItem('arena_user', JSON.stringify(merged));
+      return merged;
+    });
   };
 
   const logout = () => {
     localStorage.removeItem('arena_token');
+    localStorage.removeItem('arena_user');
     localStorage.removeItem('pending_session');
     setUser(null);
     window.location.reload();
