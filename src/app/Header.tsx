@@ -1,17 +1,4 @@
-import { useState, useEffect } from 'react';
-
 export const Header = () => {
-  const [isScrolled, setIsScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
   return (
     <header
       style={{
@@ -25,10 +12,7 @@ export const Header = () => {
         justifyContent: 'space-between',
         padding: '0 24px',
         zIndex: 100,
-        transition: 'background-color 0.25s ease, backdrop-filter 0.25s ease',
-        backgroundColor: isScrolled ? '#111726' : 'rgba(8, 12, 20, 0.4)',
-        backdropFilter: isScrolled ? 'none' : 'blur(12px)',
-        WebkitBackdropFilter: isScrolled ? 'none' : 'blur(12px)',
+        backgroundColor: '#111726',
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
