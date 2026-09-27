@@ -56,14 +56,14 @@ button {
   100% { opacity: 0.35; }
 }
 
-@keyframes toastEnterTop {
-  from { transform: translate(-50%, -100%); opacity: 0; }
-  to { transform: translate(-50%, 0); opacity: 1; }
+@keyframes toastEnterFromLeft {
+  0% { transform: translate(-150%, 0); opacity: 0; }
+  100% { transform: translate(-50%, 0); opacity: 1; }
 }
 
-@keyframes toastExitLeft {
-  from { transform: translate(-50%, 0); opacity: 1; }
-  to { transform: translate(-150%, 0); opacity: 0; }
+@keyframes toastExitToRight {
+  0% { transform: translate(-50%, 0); opacity: 1; }
+  100% { transform: translate(150%, 0); opacity: 0; }
 }
 
 @keyframes toastProgressBar {
