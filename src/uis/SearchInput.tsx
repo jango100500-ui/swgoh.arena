@@ -8,20 +8,28 @@ const PLACEHOLDERS = [
 
 export const SearchInput = () => {
   const [index, setIndex] = useState(0);
-  const [animating, setAnimating] = useState(false);
+  const [prevIndex, setPrevIndex] = useState<number | null>(null);
   const [value, setValue] = useState('');
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setAnimating(true);
-      setTimeout(() => {
-        setIndex((prev) => (prev + 1) % PLACEHOLDERS.length);
-        setAnimating(false);
-      }, 250);
-    }, 3000);
+    const timer = setInterval(() => {
+      setIndex((curr) => {
+        setPrevIndex(curr);
+        return (curr + 1) % PLACEHOLDERS.length;
+      });
+    }, 5000);
 
-    return () => clearInterval(interval);
+    return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    if (prevIndex !== null) {
+      const clearTimer = setTimeout(() => {
+        setPrevIndex(null);
+      }, 350);
+      return () => clearTimeout(clearTimer);
+    }
+  }, [prevIndex]);
 
   return (
     <div
@@ -31,21 +39,22 @@ export const SearchInput = () => {
         alignItems: 'center',
         backgroundColor: '#080c14',
         borderRadius: '6px',
-        padding: '0 12px',
-        height: '38px',
-        width: '240px',
+        padding: '0 10px',
+        height: '36px',
+        width: '175px',
+        flexShrink: 0,
       }}
     >
       <svg
-        width="15"
-        height="15"
+        width="14"
+        height="14"
         viewBox="0 0 24 24"
         fill="none"
         stroke="#475569"
         strokeWidth="2.5"
         strokeLinecap="round"
         strokeLinejoin="round"
-        style={{ marginRight: '8px', flexShrink: 0 }}
+        style={{ marginRight: '6px', flexShrink: 0 }}
       >
         <circle cx="11" cy="11" r="8" />
         <line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -63,7 +72,7 @@ export const SearchInput = () => {
             border: 'none',
             outline: 'none',
             color: '#f8fafc',
-            fontSize: '13px',
+            fontSize: '12px',
             fontWeight: 500,
             zIndex: 2,
             position: 'relative',
@@ -75,20 +84,37 @@ export const SearchInput = () => {
             style={{
               position: 'absolute',
               inset: 0,
-              display: 'flex',
-              alignItems: 'center',
               overflow: 'hidden',
               pointerEvents: 'none',
             }}
           >
+            {prevIndex !== null && (
+              <span
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  fontSize: '12px',
+                  color: '#475569',
+                  whiteSpace: 'nowrap',
+                  animation: 'placeholderExitDown 0.3s ease-in forwards',
+                }}
+              >
+                {PLACEHOLDERS[prevIndex]}
+              </span>
+            )}
             <span
+              key={index}
               style={{
-                fontSize: '13px',
+                position: 'absolute',
+                inset: 0,
+                display: 'flex',
+                alignItems: 'center',
+                fontSize: '12px',
                 color: '#475569',
                 whiteSpace: 'nowrap',
-                transform: animating ? 'translateY(100%)' : 'translateY(0)',
-                opacity: animating ? 0 : 1,
-                transition: 'transform 0.25s ease-in, opacity 0.25s ease-in',
+                animation: prevIndex !== null ? 'placeholderEnterFromTop 0.3s ease-out forwards' : undefined,
               }}
             >
               {PLACEHOLDERS[index]}
