@@ -20,7 +20,7 @@ export const Profile = ({ user, onUpdateUser, onNavigateHome }: ProfileProps) =>
 
     setTimeout(() => {
       setIsToastLeaving(true);
-      setTimeout(() => setToast(null), 300);
+      setTimeout(() => setToast(null), 350);
     }, 3000);
   };
 
@@ -61,9 +61,11 @@ export const Profile = ({ user, onUpdateUser, onNavigateHome }: ProfileProps) =>
     <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
       {toast && <Toast type={toast.type} text={toast.text} isLeaving={isToastLeaving} />}
 
-      <Breadcrumbs current="Профиль" onNavigateHome={onNavigateHome} showBackButton={true} />
+      <div style={{ maxWidth: '800px', width: '100%', margin: '0 auto', padding: '0 24px' }}>
+        <Breadcrumbs current="Профиль" onNavigateHome={onNavigateHome} showBackButton={true} />
+      </div>
 
-      <section style={{ maxWidth: '800px', width: '100%', margin: '24px auto 48px', padding: '0 24px' }}>
+      <section style={{ maxWidth: '800px', width: '100%', margin: '8px auto 48px', padding: '0 24px' }}>
         <div
           style={{
             backgroundColor: '#0e1422',
