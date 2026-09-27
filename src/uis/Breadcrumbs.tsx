@@ -18,7 +18,7 @@ export const Breadcrumbs = ({ current, onNavigateHome, showBackButton }: Breadcr
         width: '100%',
         maxWidth: '1200px',
         margin: '0 auto',
-        padding: '16px 24px 8px',
+        padding: '24px 0 16px',
         fontSize: '13px',
       }}
     >
