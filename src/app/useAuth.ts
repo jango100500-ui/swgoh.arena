@@ -13,7 +13,7 @@ export interface UserProfile {
 export const useAuth = () => {
   if (typeof window !== 'undefined' && window.location.search.includes('logout')) {
     localStorage.clear();
-    window.location.href = window.location.origin + window.location.pathname;
+    window.history.replaceState({}, document.title, window.location.pathname);
   }
 
   const [user, setUser] = useState<UserProfile | null>(() => {
@@ -89,7 +89,7 @@ export const useAuth = () => {
         }
       })
       .catch(() => {
-        // Keep cached user
+        // Keep cached
       })
       .finally(() => {
         setIsLoading(false);
