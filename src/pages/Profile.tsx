@@ -3,6 +3,8 @@ import { UserProfile } from '../app/useAuth';
 import { Breadcrumbs } from '../uis/Breadcrumbs';
 import { Toast } from '../uis/Toast';
 
+const BOT_API = 'https://swgoh-arena-bot.onrender.com';
+
 interface ProfileProps {
   user: UserProfile;
   onUpdateUser: (updated: Partial<UserProfile>) => void;
@@ -20,35 +22,30 @@ export const Profile = ({ user, onUpdateUser, onNavigateHome }: ProfileProps) =>
 
     setTimeout(() => {
       setIsToastLeaving(true);
-      setTimeout(() => setToast(null), 350);
+      setTimeout(() => setToast(null), 300);
     }, 3000);
   };
 
   const handleSync = async () => {
     if (isSyncing || toast) return;
 
+    const token = localStorage.getItem('arena_token');
+    if (!token) return;
+
     setIsSyncing(true);
 
     try {
-      const res = await fetch(
-        `https://arena-tracker-proxy.onrender.com/profile?allyCode=${encodeURIComponent(user.allyCode)}`
-      );
+      const res = await fetch(`${BOT_API}/api/auth/sync`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (!res.ok) throw new Error();
 
-      const data = await res.json();
-      const newPortrait = String(data?.selectedPlayerPortrait?.id || user.portraitId);
-      const newName = data?.name || data?.playerName || user.playerName;
-      const newGuild = data?.guildName || data?.guild || user.guildName;
-      const newTitle = data?.title || user.title;
-
-      onUpdateUser({
-        portraitId: newPortrait,
-        playerName: newName,
-        guildName: newGuild,
-        title: newTitle,
-      });
-
+      const freshUser: UserProfile = await res.json();
+      onUpdateUser(freshUser);
       triggerToast('success', 'Синхронизировано!');
     } catch {
       triggerToast('error', 'Упс, ошибка!');
