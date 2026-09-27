@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { HeroBanner } from '../uis/HeroBanner';
 import { AuthBanner } from '../uis/AuthBanner';
+import { SquadArena } from '../uis/SquadArena';
 import { useAuth } from '../app/useAuth';
 
 export const Main = () => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const [activeTab, setActiveTab] = useState('Пешая арена');
 
   const breadcrumbCurrent = !isAuthenticated && !isLoading ? 'Вход' : activeTab;
@@ -18,6 +19,9 @@ export const Main = () => {
       />
       <div style={{ padding: '0 24px', width: '100%', margin: '0 auto 40px' }}>
         {!isLoading && !isAuthenticated && <AuthBanner />}
+        {!isLoading && isAuthenticated && user && activeTab === 'Пешая арена' && (
+          <SquadArena user={user} />
+        )}
       </div>
     </main>
   );
