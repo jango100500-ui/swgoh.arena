@@ -287,7 +287,8 @@ async def on_register_confirm_code(callback: CallbackQuery, state: FSMContext):
         target_portrait_name=target_name,
         verification_time=time.time(),
         player_name=profile_data.get("name") or profile_data.get("playerName") or "Player",
-        guild_name=profile_data.get("guildName") or profile_data.get("guild") or ""
+        guild_name=profile_data.get("guildName") or profile_data.get("guild") or "",
+        title=profile_data.get("title") or ""
     )
     await state.set_state(RegisterStates.verifying_portrait)
 
@@ -353,17 +354,20 @@ async def on_verify_portrait_check(callback: CallbackQuery, state: FSMContext):
     telegram_username = callback.from_user.username or ""
     player_name = data.get("player_name", "Player")
     guild_name = data.get("guild_name", "")
+    title = data.get("title", "")
 
     async with db_pool.acquire() as conn:
         await conn.execute(
             """
-            INSERT INTO users (ally_code, telegram_id, telegram_username, player_name, portrait_id, guild_name, auth_token)
-            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            INSERT INTO users (ally_code, telegram_id, telegram_username, player_name, portrait_id, guild_name, title, auth_token)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
             ON CONFLICT (ally_code) DO UPDATE
             SET telegram_id = EXCLUDED.telegram_id,
                 telegram_username = EXCLUDED.telegram_username,
                 portrait_id = EXCLUDED.portrait_id,
                 player_name = EXCLUDED.player_name,
+                guild_name = EXCLUDED.guild_name,
+                title = EXCLUDED.title,
                 auth_token = EXCLUDED.auth_token,
                 last_active_at = NOW()
             """,
@@ -373,6 +377,7 @@ async def on_verify_portrait_check(callback: CallbackQuery, state: FSMContext):
             player_name,
             current_id,
             guild_name,
+            title,
             auth_token
         )
 
@@ -437,7 +442,7 @@ async def check_session_handler(request):
     async with db_pool.acquire() as conn:
         row = await conn.fetchrow(
             """
-            SELECT s.status, s.auth_token, u.ally_code, u.player_name, u.portrait_id, u.guild_name
+            SELECT s.status, s.auth_token, u.ally_code, u.player_name, u.portrait_id, u.guild_name, u.title
             FROM auth_sessions s
             LEFT JOIN users u ON s.ally_code = u.ally_code
             WHERE s.session_token = $1 AND s.expires_at > NOW()
@@ -456,7 +461,8 @@ async def check_session_handler(request):
                 "allyCode": row["ally_code"],
                 "playerName": row["player_name"],
                 "portraitId": row["portrait_id"],
-                "guildName": row["guild_name"]
+                "guildName": row["guild_name"],
+                "title": row["title"] or ""
             }
         })
 
@@ -473,7 +479,7 @@ async def me_handler(request):
             """
             UPDATE users SET last_active_at = NOW()
             WHERE auth_token = $1
-            RETURNING ally_code, player_name, portrait_id, guild_name
+            RETURNING ally_code, player_name, portrait_id, guild_name, title
             """,
             token
         )
@@ -485,7 +491,57 @@ async def me_handler(request):
         "allyCode": user["ally_code"],
         "playerName": user["player_name"],
         "portraitId": user["portrait_id"],
-        "guildName": user["guild_name"]
+        "guildName": user["guild_name"],
+        "title": user["title"] or ""
+    })
+
+async def sync_handler(request):
+    auth_header = request.headers.get("Authorization", "")
+    if not auth_header.startswith("Bearer "):
+        return cors_response({"error": "Unauthorized"}, status=401)
+
+    token = auth_header.split(" ")[1]
+    async with db_pool.acquire() as conn:
+        user = await conn.fetchrow("SELECT ally_code FROM users WHERE auth_token = $1", token)
+
+    if not user:
+        return cors_response({"error": "User not found"}, status=401)
+
+    ally_code = user["ally_code"]
+    profile_data, err, _ = await fetch_game_profile(ally_code)
+    if not profile_data:
+        return cors_response({"error": f"Game server error: {err}"}, status=502)
+
+    new_portrait = str(profile_data.get("selectedPlayerPortrait", {}).get("id", ""))
+    new_name = profile_data.get("name") or profile_data.get("playerName") or "Player"
+    new_guild = profile_data.get("guildName") or profile_data.get("guild") or ""
+    new_title = profile_data.get("title") or ""
+
+    async with db_pool.acquire() as conn:
+        updated = await conn.fetchrow(
+            """
+            UPDATE users
+            SET portrait_id = $1,
+                player_name = $2,
+                guild_name = $3,
+                title = $4,
+                last_active_at = NOW()
+            WHERE auth_token = $5
+            RETURNING ally_code, player_name, portrait_id, guild_name, title
+            """,
+            new_portrait,
+            new_name,
+            new_guild,
+            new_title,
+            token
+        )
+
+    return cors_response({
+        "allyCode": updated["ally_code"],
+        "playerName": updated["player_name"],
+        "portraitId": updated["portrait_id"],
+        "guildName": updated["guild_name"],
+        "title": updated["title"] or ""
     })
 
 async def health_check_handler(request):
@@ -500,6 +556,9 @@ async def main():
         ssl="require"
     )
 
+    async with db_pool.acquire() as conn:
+        await conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS title TEXT")
+
     app = web.Application()
     app.router.add_route("OPTIONS", "/{tail:.*}", options_handler)
     app.router.add_get("/", health_check_handler)
@@ -507,6 +566,7 @@ async def main():
     app.router.add_post("/api/auth/start-session", start_session_handler)
     app.router.add_get("/api/auth/check-session", check_session_handler)
     app.router.add_get("/api/auth/me", me_handler)
+    app.router.add_post("/api/auth/sync", sync_handler)
 
     runner = web.AppRunner(app)
     await runner.setup()
