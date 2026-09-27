@@ -31,9 +31,21 @@ export const AuthBanner = () => {
             fontSize: '14px',
             color: '#94a3b8',
             lineHeight: 1.5,
+            display: 'inline',
           }}
         >
-          Для входа или регистрации понадобится только пара свободного времени, код союзника и Telegram. Никаких данных мы не собираем 🤗
+          Для входа или регистрации понадобится только пара минут свободного времени, код союзника и Telegram. Никаких данных мы не собираем{' '}
+          <img
+            src="/pngs/huggingface.png"
+            alt="🤗"
+            style={{
+              width: '18px',
+              height: '18px',
+              verticalAlign: 'text-bottom',
+              display: 'inline-block',
+              marginLeft: '2px',
+            }}
+          />
         </p>
 
         <button
