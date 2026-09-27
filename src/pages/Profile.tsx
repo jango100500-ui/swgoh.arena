@@ -8,10 +8,11 @@ const BOT_API = 'https://swgoh-arena-bot.onrender.com';
 interface ProfileProps {
   user: UserProfile;
   onUpdateUser: (updated: Partial<UserProfile>) => void;
+  onLogout: () => void;
   onNavigateHome: () => void;
 }
 
-export const Profile = ({ user, onUpdateUser, onNavigateHome }: ProfileProps) => {
+export const Profile = ({ user, onUpdateUser, onLogout, onNavigateHome }: ProfileProps) => {
   const [isSyncing, setIsSyncing] = useState(false);
   const [toast, setToast] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [isToastLeaving, setIsToastLeaving] = useState(false);
@@ -70,7 +71,7 @@ export const Profile = ({ user, onUpdateUser, onNavigateHome }: ProfileProps) =>
             padding: '32px 28px',
             display: 'flex',
             flexDirection: 'column',
-            gap: '28px',
+            gap: '24px',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
@@ -126,29 +127,58 @@ export const Profile = ({ user, onUpdateUser, onNavigateHome }: ProfileProps) =>
             </div>
           </div>
 
-          <button
-            onClick={handleSync}
-            disabled={isSyncing || Boolean(toast)}
-            style={{
-              width: '100%',
-              backgroundColor: '#2563EB',
-              color: '#ffffff',
-              fontSize: '14px',
-              fontWeight: 700,
-              padding: '13px 24px',
-              borderRadius: '6px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'background-color 0.15s ease, opacity 0.15s ease',
-              opacity: isSyncing || Boolean(toast) ? 0.45 : 1,
-              cursor: isSyncing || Boolean(toast) ? 'default' : 'pointer',
-            }}
-            onMouseOver={(e) => !isSyncing && !toast && (e.currentTarget.style.backgroundColor = '#1d4ed8')}
-            onMouseOut={(e) => !isSyncing && !toast && (e.currentTarget.style.backgroundColor = '#2563EB')}
-          >
-            {isSyncing ? 'Синхронизация...' : 'Синхронизировать'}
-          </button>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <button
+              onClick={handleSync}
+              disabled={isSyncing || Boolean(toast)}
+              style={{
+                width: '100%',
+                backgroundColor: '#2563EB',
+                color: '#ffffff',
+                fontSize: '14px',
+                fontWeight: 700,
+                padding: '13px 24px',
+                borderRadius: '6px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'background-color 0.15s ease, opacity 0.15s ease',
+                opacity: isSyncing || Boolean(toast) ? 0.45 : 1,
+                cursor: isSyncing || Boolean(toast) ? 'default' : 'pointer',
+              }}
+              onMouseOver={(e) => !isSyncing && !toast && (e.currentTarget.style.backgroundColor = '#1d4ed8')}
+              onMouseOut={(e) => !isSyncing && !toast && (e.currentTarget.style.backgroundColor = '#2563EB')}
+            >
+              {isSyncing ? 'Синхронизация...' : 'Синхронизировать'}
+            </button>
+
+            <button
+              onClick={onLogout}
+              style={{
+                width: '100%',
+                backgroundColor: '#141a29',
+                color: '#94a3b8',
+                fontSize: '14px',
+                fontWeight: 600,
+                padding: '12px 24px',
+                borderRadius: '6px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'background-color 0.15s ease, color 0.15s ease',
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = '#1e283d';
+                e.currentTarget.style.color = '#f8fafc';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = '#141a29';
+                e.currentTarget.style.color = '#94a3b8';
+              }}
+            >
+              Выйти из аккаунта
+            </button>
+          </div>
         </div>
       </section>
     </div>
