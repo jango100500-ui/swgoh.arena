@@ -29,7 +29,7 @@ export const Footer = () => {
               <a href="#" style={{ color: '#64748b' }}>Guilds</a>
             </li>
             <li>
-              <span style={{ color: '#f1f5f9' }}>Arena (этот)</span>
+              <span style={{ color: '#3b82f6', fontWeight: 700 }}>Arena</span>
             </li>
           </ul>
         </div>
