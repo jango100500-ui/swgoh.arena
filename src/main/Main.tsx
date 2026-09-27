@@ -21,10 +21,10 @@ export const Main = () => {
       />
       <div style={{ padding: '0 24px', width: '100%', margin: '0 auto 40px' }}>
         {!isLoading && !isAuthenticated && <AuthBanner />}
-        {!isLoading && isAuthenticated && user && activeTab === 'Пешая арена' && (
+        {isAuthenticated && user && activeTab === 'Пешая арена' && (
           <SquadArena user={user} onViewHistory={() => setActiveTab('История')} />
         )}
-        {!isLoading && isAuthenticated && user && activeTab === 'История' && (
+        {isAuthenticated && user && activeTab === 'История' && (
           <BattleHistory user={user} />
         )}
       </div>
