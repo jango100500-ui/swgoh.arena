@@ -14,10 +14,47 @@ export const useAuth = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<UserProfile | null>(null);
 
-  const fetchProfile = (token: string) => {
-    return fetch(`${BOT_API}/api/auth/me`, {
+  useEffect(() => {
+    const pendingSession = localStorage.getItem('pending_session');
+
+    if (pendingSession) {
+      const checkSession = async () => {
+        try {
+          const res = await fetch(`${BOT_API}/api/auth/check-session?token=${encodeURIComponent(pendingSession)}`);
+          if (!res.ok) return;
+          const data = await res.json();
+
+          if (data?.status === 'approved' && data.authToken) {
+            localStorage.removeItem('pending_session');
+            localStorage.setItem('arena_token', data.authToken);
+            window.location.reload();
+          }
+        } catch {
+          // Keep polling
+        }
+      };
+
+      checkSession();
+      const interval = setInterval(checkSession, 2000);
+      window.addEventListener('focus', checkSession);
+
+      return () => {
+        clearInterval(interval);
+        window.removeEventListener('focus', checkSession);
+      };
+    }
+
+    const existingToken = localStorage.getItem('arena_token');
+
+    if (!existingToken) {
+      setIsLoading(false);
+      setUser(null);
+      return;
+    }
+
+    fetch(`${BOT_API}/api/auth/me`, {
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${existingToken}`,
       },
     })
       .then((res) => {
@@ -26,42 +63,14 @@ export const useAuth = () => {
       })
       .then((data: UserProfile) => {
         setUser(data);
-        return data;
       })
       .catch(() => {
         localStorage.removeItem('arena_token');
         setUser(null);
-        return null;
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
-  };
-
-  useEffect(() => {
-    const pendingSession = localStorage.getItem('pending_session');
-    const existingToken = localStorage.getItem('arena_token');
-
-    if (pendingSession && !existingToken) {
-      fetch(`${BOT_API}/api/auth/check-session?token=${encodeURIComponent(pendingSession)}`)
-        .then((res) => (res.ok ? res.json() : null))
-        .then((data) => {
-          if (data?.status === 'approved' && data.authToken) {
-            localStorage.removeItem('pending_session');
-            localStorage.setItem('arena_token', data.authToken);
-            setUser(data.user);
-          }
-        })
-        .finally(() => setIsLoading(false));
-      return;
-    }
-
-    if (!existingToken) {
-      setIsLoading(false);
-      setUser(null);
-      return;
-    }
-
-    fetchProfile(existingToken).finally(() => {
-      setIsLoading(false);
-    });
   }, []);
 
   const updateUser = (updated: Partial<UserProfile>) => {
@@ -72,6 +81,7 @@ export const useAuth = () => {
     localStorage.removeItem('arena_token');
     localStorage.removeItem('pending_session');
     setUser(null);
+    window.location.reload();
   };
 
   return {
