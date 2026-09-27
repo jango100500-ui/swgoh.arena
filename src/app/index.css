@@ -56,14 +56,14 @@ button {
   100% { opacity: 0.35; }
 }
 
-@keyframes toastSlideIn {
-  from { transform: translateX(110%); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
+@keyframes toastEnterTop {
+  from { transform: translate(-50%, -100%); opacity: 0; }
+  to { transform: translate(-50%, 0); opacity: 1; }
 }
 
-@keyframes toastSlideOut {
-  from { transform: translateX(0); opacity: 1; }
-  to { transform: translateX(-120%); opacity: 0; }
+@keyframes toastExitLeft {
+  from { transform: translate(-50%, 0); opacity: 1; }
+  to { transform: translate(-150%, 0); opacity: 0; }
 }
 
 @keyframes toastProgressBar {
