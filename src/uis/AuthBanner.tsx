@@ -7,6 +7,7 @@ export const AuthBanner = () => {
         margin: '24px auto 0',
         padding: '32px 28px',
         backgroundColor: '#0e1422',
+        borderRadius: '6px',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'flex-start',
@@ -24,33 +25,37 @@ export const AuthBanner = () => {
         Войди в аккаунт, чтобы пользоваться ареной
       </h2>
 
-      <p
-        style={{
-          fontSize: '14px',
-          color: '#94a3b8',
-          lineHeight: 1.5,
-          maxWidth: '680px',
-        }}
-      >
-        Для входа или регистрации понадобится только пара свободного времени, код союзника и Telegram. Никаких данных мы не собираем 🤗
-      </p>
+      <div style={{ width: '100%', maxWidth: '680px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <p
+          style={{
+            fontSize: '14px',
+            color: '#94a3b8',
+            lineHeight: 1.5,
+          }}
+        >
+          Для входа или регистрации понадобится только пара свободного времени, код союзника и Telegram. Никаких данных мы не собираем 🤗
+        </p>
 
-      <button
-        style={{
-          marginTop: '8px',
-          backgroundColor: '#2563EB',
-          color: '#ffffff',
-          fontSize: '14px',
-          fontWeight: 700,
-          padding: '10px 24px',
-          borderRadius: 0,
-          transition: 'background-color 0.15s ease',
-        }}
-        onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#1d4ed8')}
-        onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#2563EB')}
-      >
-        Войти
-      </button>
+        <button
+          style={{
+            width: '100%',
+            backgroundColor: '#2563EB',
+            color: '#ffffff',
+            fontSize: '14px',
+            fontWeight: 700,
+            padding: '12px 24px',
+            borderRadius: '6px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'background-color 0.15s ease',
+          }}
+          onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#1d4ed8')}
+          onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#2563EB')}
+        >
+          Войти
+        </button>
+      </div>
     </section>
   );
 };
