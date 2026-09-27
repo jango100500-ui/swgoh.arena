@@ -1,3 +1,5 @@
+import { SearchInput } from '../uis/SearchInput';
+
 export const Header = () => {
   return (
     <header
@@ -25,7 +27,8 @@ export const Header = () => {
           swgoh<span style={{ color: '#2563EB' }}>.arena</span>
         </span>
       </div>
-      <div></div>
+
+      <SearchInput />
     </header>
   );
 };
