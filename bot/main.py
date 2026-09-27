@@ -52,12 +52,17 @@ def format_ally_code(code: str) -> str:
     return cleaned
 
 async def fetch_game_profile(ally_code: str):
-    url = f"{PROXY_URL}/profile?allyCode={clean_ally_code(ally_code)}"
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url, timeout=15) as resp:
-            if resp.status == 200:
-                return await resp.json()
-            return None
+    clean = clean_ally_code(ally_code)
+    url = f"{PROXY_URL}/profile?allyCode={clean}"
+    try:
+        timeout = aiohttp.ClientTimeout(total=60)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with session.get(url) as resp:
+                if resp.status == 200:
+                    return await resp.json()
+                return None
+    except Exception:
+        return None
 
 async def complete_session_in_db(session_token: str, ally_code: str, telegram_id: int, auth_token: str):
     if not session_token:
