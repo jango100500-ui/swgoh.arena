@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 
+const BOT_API = 'https://swgoh-arena-bot.onrender.com';
+
 export interface UserProfile {
   allyCode: string;
   playerName: string;
@@ -12,17 +14,32 @@ export const useAuth = () => {
   const [user, setUser] = useState<UserProfile | null>(null);
 
   useEffect(() => {
-    const token = localStorage.getItem('arena_token');
+    const pendingSession = localStorage.getItem('pending_session');
+    const existingToken = localStorage.getItem('arena_token');
 
-    if (!token) {
+    if (pendingSession && !existingToken) {
+      fetch(`${BOT_API}/api/auth/check-session?token=${encodeURIComponent(pendingSession)}`)
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data?.status === 'approved' && data.authToken) {
+            localStorage.removeItem('pending_session');
+            localStorage.setItem('arena_token', data.authToken);
+            setUser(data.user);
+          }
+        })
+        .finally(() => setIsLoading(false));
+      return;
+    }
+
+    if (!existingToken) {
       setIsLoading(false);
       setUser(null);
       return;
     }
 
-    fetch('https://arena-tracker-2uod.onrender.com/api/auth/me', {
+    fetch(`${BOT_API}/api/auth/me`, {
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${existingToken}`,
       },
     })
       .then((res) => {
@@ -43,6 +60,7 @@ export const useAuth = () => {
 
   const logout = () => {
     localStorage.removeItem('arena_token');
+    localStorage.removeItem('pending_session');
     setUser(null);
   };
 
