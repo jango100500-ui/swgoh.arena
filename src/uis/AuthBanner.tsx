@@ -1,28 +1,16 @@
 import { useState } from 'react';
 
-const BOT_API = 'https://swgoh-arena-bot.onrender.com';
-
 export const AuthBanner = () => {
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async () => {
+  const handleLogin = () => {
     setLoading(true);
-    try {
-      const res = await fetch(`${BOT_API}/api/auth/start-session`, {
-        method: 'POST',
-      });
+    const randomPart = Math.random().toString(36).substring(2, 10);
+    const timePart = Date.now().toString(36);
+    const sessionToken = `auth_${randomPart}${timePart}`;
 
-      if (!res.ok) {
-        throw new Error();
-      }
-
-      const data = await res.json();
-      localStorage.setItem('pending_session', data.sessionToken);
-
-      window.location.href = data.botUrl;
-    } catch {
-      setLoading(false);
-    }
+    localStorage.setItem('pending_session', sessionToken);
+    window.location.href = `https://t.me/SwgohArena_Bot?start=${sessionToken}`;
   };
 
   return (
@@ -95,7 +83,7 @@ export const AuthBanner = () => {
           onMouseOver={(e) => !loading && (e.currentTarget.style.backgroundColor = '#1d4ed8')}
           onMouseOut={(e) => !loading && (e.currentTarget.style.backgroundColor = '#2563EB')}
         >
-          {loading ? 'Перенаправляем в Telegram...' : 'Войти'}
+          {loading ? 'Открываем Telegram...' : 'Войти'}
         </button>
       </div>
     </section>
