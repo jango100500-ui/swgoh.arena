@@ -23,7 +23,7 @@ from aiogram.types import (
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 DATABASE_URL = os.getenv("DATABASE_URL")
-PROXY_URL = os.getenv("PROXY_URL", "https://arena-tracker-2uod.onrender.com")
+PROXY_URL = os.getenv("PROXY_URL", "https://arena-tracker-2uod.onrender.com").rstrip("/")
 PORT = int(os.getenv("PORT", 8080))
 
 if not BOT_TOKEN or not DATABASE_URL:
@@ -60,11 +60,10 @@ async def fetch_game_profile(ally_code: str):
             async with session.get(url) as resp:
                 if resp.status == 200:
                     data = await resp.json()
-                    return data, None
-                err_text = await resp.text()
-                return None, f"HTTP {resp.status}"
+                    return data, None, url
+                return None, f"HTTP {resp.status}", url
     except Exception as exc:
-        return None, str(exc)
+        return None, str(exc), url
 
 async def complete_session_in_db(session_token: str, ally_code: str, telegram_id: int, auth_token: str):
     if not session_token:
@@ -262,9 +261,9 @@ async def on_register_confirm_code(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     ally_code = data.get("ally_code")
 
-    profile_data, err = await fetch_game_profile(ally_code)
+    profile_data, err, target_url = await fetch_game_profile(ally_code)
     if not profile_data:
-        await callback.answer(f"Ошибка Comlink: {err}", show_alert=True)
+        await callback.answer(f"{err} на {target_url}", show_alert=True)
         return
 
     portraits = profile_data.get("playerPortraits", [])
@@ -336,7 +335,7 @@ async def on_verify_portrait_check(callback: CallbackQuery, state: FSMContext):
         await on_register_confirm_code(callback, state)
         return
 
-    profile_data, err = await fetch_game_profile(ally_code)
+    profile_data, err, _ = await fetch_game_profile(ally_code)
     if not profile_data:
         await callback.answer(f"Сервер игры недоступен: {err}", show_alert=True)
         return
