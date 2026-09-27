@@ -1,6 +1,9 @@
 import { SearchInput } from '../uis/SearchInput';
+import { useAuth } from './useAuth';
 
 export const Header = () => {
+  const { user, isAuthenticated } = useAuth();
+
   return (
     <header
       style={{
@@ -34,7 +37,37 @@ export const Header = () => {
         </span>
       </div>
 
-      <SearchInput />
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <SearchInput />
+
+        <div
+          style={{
+            width: '36px',
+            height: '36px',
+            borderRadius: '6px',
+            backgroundColor: '#080c14',
+            overflow: 'hidden',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+            border: isAuthenticated ? '1px solid #1e293b' : '1px solid #111726',
+          }}
+        >
+          {isAuthenticated && user?.portraitId ? (
+            <img
+              src={`https://arena-tracker-proxy.onrender.com/portraitImage?portraitId=${encodeURIComponent(user.portraitId)}`}
+              alt={user.playerName}
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+          ) : (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+          )}
+        </div>
+      </div>
     </header>
   );
 };
