@@ -1,5 +1,11 @@
-const TABS = ['Пешая арена', 'Флот', 'Рейтинг', 'История'] as const;
-export type TabType = (typeof TABS)[number];
+export const TAB_PATHS = {
+  'Пешая арена': '/',
+  'Флот': '/fleet',
+  'Рейтинг': '/rating',
+  'История': '/history',
+} as const;
+
+export type TabType = keyof typeof TAB_PATHS;
 
 const TITLES: Record<TabType, string> = {
   'Пешая арена': 'sWGoH Рейтинг & Меты Пешей Арены',
@@ -19,14 +25,14 @@ interface HeroBannerProps {
   activeTab: TabType;
   breadcrumbCurrent: string;
   onNavigateHome: () => void;
-  onTabChange: (tab: TabType) => void;
+  onSelectTab: (tab: TabType) => void;
 }
 
 export const HeroBanner = ({
   activeTab,
   breadcrumbCurrent,
   onNavigateHome,
-  onTabChange,
+  onSelectTab,
 }: HeroBannerProps) => {
   const isSpace = activeTab === 'Рейтинг' || activeTab === 'История';
   const bgOpacity = isSpace ? 0.22 : 0.12;
@@ -94,12 +100,12 @@ export const HeroBanner = ({
             scrollbarWidth: 'none',
           }}
         >
-          {TABS.map((tab) => {
+          {(Object.keys(TAB_PATHS) as TabType[]).map((tab) => {
             const isActive = activeTab === tab;
             return (
               <button
                 key={tab}
-                onClick={() => onTabChange(tab)}
+                onClick={() => onSelectTab(tab)}
                 style={{
                   position: 'relative',
                   paddingBottom: '14px',
