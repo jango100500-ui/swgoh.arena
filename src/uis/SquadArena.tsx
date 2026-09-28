@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { UserProfile } from '../app/useAuth';
+import { MetricsBar } from './MetricsBar';
 
 interface SquadArenaProps {
   user: UserProfile;
@@ -29,79 +30,13 @@ const ALIGNMENT_COLORS: Record<Unit['alignment'], string> = {
   galactic_legend: '#eab308',
 };
 
-const LEADER_DICTIONARY: Record<string, string> = {
-  'Третья Сестра': 'Третьей Сестры',
-  'Вторая Сестра': 'Второй Сестры',
-  'Девятая Сестра': 'Девятой Сестры',
-  'Седьмой Брат': 'Седьмого Брата',
-  'Восьмой Брат': 'Восьмого Брата',
-  'Пятый Брат': 'Пятого Брата',
-  'Великий Инквизитор': 'Великого Инквизитора',
-  'Мастер-джедай Люк Скайуокер': 'Мастера-джедая Люка Скайуокера',
-  'Верховный лидер Кайло Рен': 'Верховного лидера Кайло Рена',
-  'Рей': 'Рей',
-  'Лорд Вейдер': 'Лорда Вейдера',
-  'Джабба Хатт': 'Джаббы Хатта',
-  'Джабба Десилийик Тиуре': 'Джаббы Хатта',
-  'Магистр Кеноби': 'Магистра Кеноби',
-  'Мастер-джедай Кеноби': 'Мастера-джедая Кеноби',
-  'Генерал Гривус': 'Генерала Гривуса',
-  'Генерал Скайуокер': 'Генерала Скайуокера',
-  'Дарт Вейдер': 'Дарта Вейдера',
-  'Дарт Реван': 'Дарта Ревана',
-  'Дарт Малак': 'Дарта Малака',
-  'Дарт Трейя': 'Дарт Трейи',
-  'Дарт Нихилус': 'Дарта Нихилуса',
-  'Дарт Сион': 'Дарта Сиона',
-  'Дарт Сидиус': 'Дарта Сидиуса',
-  'Император Палпатин': 'Императора Палпатина',
-  'Вечный император ситхов': 'Вечного императора ситхов',
-  'Старкиллер': 'Старкиллера',
-  'Доктор Афра': 'Доктора Афры',
-  'Бо-Катан (Кризе)': 'Бо-Катан',
-  'Мандалор (Глиф Бескара)': 'Мандалора',
-  'Бейн': 'Бейна',
-  'Дарт Бейн': 'Дарта Бейна',
-  'Падме Амидала': 'Падме Амидалы',
-  'Королева Амидала': 'Королевы Амидалы',
-  'Квай-Гон Джинн': 'Квай-Гона Джинна',
-  'Люк Скайуокер': 'Люка Скайуокера',
-  'Командир Люк Скайуокер': 'Командира Люка Скайуокера',
-  'Оби-Ван Кеноби': 'Оби-Вана Кеноби',
-  'Энакин Скайуокер': 'Энакина Скайуокера',
-  'Рыцарь-джедай Энакин': 'Рыцаря-джедая Энакина',
-  'Асока Тано': 'Асоки Тано',
-  'Мейс Винду': 'Мейса Винду',
-};
-
-const declineName = (name: string): string => {
-  if (!name) return '';
-  if (LEADER_DICTIONARY[name]) return LEADER_DICTIONARY[name];
-
-  return name
-    .split(' ')
-    .map((word) => {
-      if (/^(де|ван|фон|ла|да|десилийик)$/i.test(word)) return word;
-      if (word.endsWith('ая')) return word.slice(0, -2) + 'ой';
-      if (word.endsWith('яя')) return word.slice(0, -2) + 'ей';
-      if (word.endsWith('ий') || word.endsWith('ый') || word.endsWith('ой')) return word.slice(0, -2) + 'ого';
-      if (word.endsWith('а')) return word.slice(0, -1) + 'ы';
-      if (word.endsWith('я')) return word.slice(0, -1) + 'и';
-      if (word.endsWith('ь')) return word.slice(0, -1) + 'я';
-      if (/[бвгджзклмнпрстфхцчшщ]$/i.test(word)) return word + 'а';
-      return word;
-    })
-    .join(' ');
-};
-
 export const SquadArena = ({ user, onViewHistory }: SquadArenaProps) => {
   const [rank, setRank] = useState<number | string>('—');
   const [squad, setSquad] = useState<Unit[]>([]);
-  const [hasDatacron, setHasDatacron] = useState(false);
-  const [datacronIcon, setDatacronIcon] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [lastUpdatedTime, setLastUpdatedTime] = useState<Date>(new Date());
   const [history, setHistory] = useState<BattleEvent[]>([]);
+  const [copied, setCopied] = useState(false);
   const lastRankRef = useRef<number | null>(null);
 
   const storageKey = `arena_tracker_history_${user.allyCode}`;
@@ -142,18 +77,6 @@ export const SquadArena = ({ user, onViewHistory }: SquadArenaProps) => {
           };
         });
 
-        const dc = squadProfile.squad?.datacron;
-        if (dc) {
-          setHasDatacron(true);
-          const iconId = dc.icon || dc.templateId || dc.setId;
-          setDatacronIcon(
-            iconId ? `https://game-assets.swgoh.gg/textures/${encodeURIComponent(iconId)}.png` : null
-          );
-        } else {
-          setHasDatacron(false);
-          setDatacronIcon(null);
-        }
-
         setSquad(units);
         setRank(squadProfile.rank || '—');
         setLastUpdatedTime(new Date());
@@ -183,7 +106,7 @@ export const SquadArena = ({ user, onViewHistory }: SquadArenaProps) => {
         }
       }
     } catch {
-      // Ignore network errors
+      // Ignore
     } finally {
       setLoading(false);
     }
@@ -195,12 +118,18 @@ export const SquadArena = ({ user, onViewHistory }: SquadArenaProps) => {
     return () => clearInterval(interval);
   }, [user.allyCode]);
 
+  const handleCopyCode = () => {
+    navigator.clipboard.writeText(user.allyCode);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+
+  const formattedAllyCode =
+    user.allyCode.length === 9
+      ? `${user.allyCode.slice(0, 3)}-${user.allyCode.slice(3, 6)}-${user.allyCode.slice(6)}`
+      : user.allyCode;
+
   const recentBattles = history.slice(0, 3);
-  const leaderUnit = squad[0];
-  const packTitle = leaderUnit ? `Пак ${declineName(leaderUnit.name)}` : null;
-
-  const displaySlots = Array.from({ length: 5 }).map((_, idx) => squad[idx] || null);
-
   const formattedTime = lastUpdatedTime.toLocaleTimeString('ru-RU', {
     hour: '2-digit',
     minute: '2-digit',
@@ -208,26 +137,46 @@ export const SquadArena = ({ user, onViewHistory }: SquadArenaProps) => {
 
   return (
     <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <MetricsBar currentRank={rank} battlesCount={history.length} />
+
       <section
         style={{
           position: 'relative',
           zIndex: 2,
           width: '100%',
           maxWidth: '1100px',
-          margin: '24px auto 0',
+          margin: '16px auto 0',
           padding: '24px 22px',
           backgroundColor: '#0e1422',
           borderRadius: '6px',
           display: 'flex',
           flexDirection: 'column',
-          gap: '18px',
+          gap: '20px',
           boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <h2 style={{ fontSize: '19px', fontWeight: 800, color: '#ffffff' }}>
-            Ранг {loading ? '...' : `#${rank}`}
-          </h2>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#ffffff' }}>
+              Ранг {loading ? '...' : `#${rank}`}
+            </h2>
+            <button
+              onClick={handleCopyCode}
+              style={{
+                fontSize: '11px',
+                fontWeight: 600,
+                color: copied ? '#4ade80' : '#64748b',
+                backgroundColor: '#070b13',
+                padding: '2px 8px',
+                borderRadius: '4px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+              }}
+            >
+              <span>{copied ? 'Скопировано!' : formattedAllyCode}</span>
+            </button>
+          </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#64748b', fontSize: '12px', fontWeight: 600 }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -237,42 +186,6 @@ export const SquadArena = ({ user, onViewHistory }: SquadArenaProps) => {
             <span>{formattedTime}</span>
           </div>
         </div>
-
-        {packTitle && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '13px', fontWeight: 700, color: '#94a3b8' }}>
-              {packTitle}
-            </span>
-
-            {hasDatacron && (
-              <div
-                style={{
-                  width: '22px',
-                  height: '22px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                }}
-              >
-                {datacronIcon ? (
-                  <img
-                    src={datacronIcon}
-                    alt="Datacron"
-                    style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                ) : (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2">
-                    <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2" />
-                  </svg>
-                )}
-              </div>
-            )}
-          </div>
-        )}
 
         <div
           style={{
@@ -305,24 +218,7 @@ export const SquadArena = ({ user, onViewHistory }: SquadArenaProps) => {
                   />
                 </div>
               ))
-            : displaySlots.map((unit, idx) => {
-                if (!unit) {
-                  return (
-                    <div key={`empty_${idx}`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                      <div
-                        style={{
-                          width: '54px',
-                          height: '54px',
-                          borderRadius: '50%',
-                          backgroundColor: '#121827',
-                          border: '1.5px dashed #202b3f',
-                          flexShrink: 0,
-                        }}
-                      />
-                    </div>
-                  );
-                }
-
+            : squad.map((unit) => {
                 const borderColor = ALIGNMENT_COLORS[unit.alignment] || '#ffffff';
                 return (
                   <div key={unit.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', minWidth: 0 }}>
