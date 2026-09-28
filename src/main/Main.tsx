@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { HeroBanner, TabType } from '../uis/HeroBanner';
 import { AuthBanner } from '../uis/AuthBanner';
 import { SquadArena } from '../uis/SquadArena';
@@ -9,11 +8,19 @@ interface MainProps {
   user: UserProfile | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  activeTab: TabType;
+  onSelectTab: (tab: TabType) => void;
+  onNavigateHome: () => void;
 }
 
-export const Main = ({ user, isAuthenticated, isLoading }: MainProps) => {
-  const [activeTab, setActiveTab] = useState<TabType>('Пешая арена');
-
+export const Main = ({
+  user,
+  isAuthenticated,
+  isLoading,
+  activeTab,
+  onSelectTab,
+  onNavigateHome,
+}: MainProps) => {
   const breadcrumbCurrent = !isAuthenticated && !isLoading ? 'Вход' : activeTab;
 
   return (
@@ -21,13 +28,13 @@ export const Main = ({ user, isAuthenticated, isLoading }: MainProps) => {
       <HeroBanner
         activeTab={activeTab}
         breadcrumbCurrent={breadcrumbCurrent}
-        onNavigateHome={() => setActiveTab('Пешая арена')}
-        onTabChange={setActiveTab}
+        onNavigateHome={onNavigateHome}
+        onSelectTab={onSelectTab}
       />
       <div style={{ padding: '0 24px', width: '100%', margin: '0 auto 40px' }}>
         {!isLoading && !isAuthenticated && <AuthBanner />}
         {isAuthenticated && user && activeTab === 'Пешая арена' && (
-          <SquadArena user={user} onViewHistory={() => setActiveTab('История')} />
+          <SquadArena user={user} onViewHistory={() => onSelectTab('История')} />
         )}
         {isAuthenticated && user && activeTab === 'История' && (
           <BattleHistory user={user} />
